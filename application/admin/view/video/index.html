@@ -1,0 +1,233 @@
+{include file="public:head" /}
+
+<style>
+	.btn-container { margin-bottom: 10px; }
+	.layui-table-cell .layui-form-checkbox[lay-skin=primary] { top: 5px; }
+	.layui-layer-dialog { top: 160px !important; }
+</style>
+
+<div class="layui-fluid">
+	<div class="layui-card">
+		<div class="layui-card-header">视频列表</div>
+		<div class="layui-card-body">
+			<div class="btn-container layui-form">
+				<!-- 排序搜索 -->
+				<div class="layui-form-item">
+				    <label class="layui-form-label">排序搜索</label>
+				    <div class="layui-input-block">
+				    	<select name="search" lay-filter="search">
+					        <option value="0">按视频上传时间新到老排序</option>
+					        <option value="1">按视频喜欢多到少排序</option>
+					        <option value="2">按视频观看次数多到少排序</option>
+				    	</select>
+				    </div>
+				</div>
+
+				<!-- 类型搜索 -->
+				<div class="layui-form-item">
+				    <label class="layui-form-label">类型搜索</label>
+				    <div class="layui-input-block">
+				    	<select name="type" lay-filter="type">
+					        <option value="all">全部</option>
+					        {foreach $typelist as $key => $vo}
+						        <option value="{$vo.id}">{$vo.type}</option>
+						    {/foreach}
+				    	</select>
+				    </div>
+				</div>
+
+				<div class="btn-container">
+					<button class="layui-btn layui-btn-normal" onclick="upload(null)">上传视频</button>
+					<button class="layui-btn layui-btn-danger layui-btn-normal" id="moreDeleted">批量删除</button>
+					<button class="layui-btn" id="recommendSelect">推荐查询</button>
+				</div>
+				<table id="table" lay-filter="table" lay-data="{id: table}"></table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	layui.use(['table', 'form'], function() {
+		var table = layui.table;
+		var form  = layui.form;
+
+		var tableIns = table.render({
+			elem: "#table",
+			url: "{:url('index')}",
+			page: true,
+			done: function(res) {
+			},
+			cols: [[
+				{type: 'checkbox', fixed: 'left'},
+				{field: 'id', title: 'ID', width: 60, align: 'center', fixed: 'left'},
+				{field: 'title', title: '视频名称', width: 140, align: 'center', fixed: 'left'},
+				{field: 'time', title: '视频长度', width: 90, align: 'center'},
+				{field: 'type', title: '视频类型', width: 90, align: 'center'},
+				{field: 'fabulous', title: '喜欢', width: 80, align: 'center'},
+				{field: 'step_on', title: '不喜欢', width: 80, align: 'center'},
+				{field: 'watch_count', title: '观看次数', width: 100, align: 'center', sort: true},
+				{field: 'create_time', title: '上传时间', width: 120, align: 'center'},
+				{field: 'update_time', title: '更新时间', width: 120, align: 'center'},
+				{title: '特别推荐', width: 100, align: 'center', templet: '#recommend', fixed: 'right'},
+				{title: '是否高清', width: 100, align: 'center', templet: '#isHd', fixed: 'right'},
+				{title: '操作', width: 120, align: 'center', templet: '#operation', fixed: 'right'}
+			]]
+		});
+
+		// 监听工具栏
+		table.on('tool(table)', function(o) {
+			var d   = o.data,
+				lEv = o.event,
+				tr  = o.tr
+
+			if (lEv == 'detail') upload(d.id);
+			if (lEv == 'deleted') deleted(d);
+		})
+
+		// 监听排序搜索
+		form.on('select(search)', function(data) {
+			search(tableIns);
+		})
+
+		// 类型搜索
+		form.on('select(type)', function(data) {
+			search(tableIns);
+		})
+
+		// 监听高清
+		var checkU = '{:url("definition")}'
+		form.on('checkbox(isHd)', function(obj) {
+			var d = { id: this.id, is_hd: this.value == 0 ? 1 : 0 }
+
+			layer.load(2)
+			$.post(checkU, d, function(res) {
+				layer.closeAll()
+			})
+		})
+		// 监听推荐
+		form.on('checkbox(recommend)', function(obj) {
+			var d= { id: this.id, recommend: this.value == 0 ? 1 : 0 }
+
+			layer.load(2)
+			$.post(checkU, d, function(res) {
+				layer.closeAll()
+			})
+		}) 
+
+		// 批量删除
+		$('#moreDeleted').click(function() {
+			layer.confirm('确定批量删除数据?', function() {
+				layer.closeAll();
+				var cs = table.checkStatus('table')
+
+				if (cs.data.length == 0) {
+					layer.msg('请您选择操作项!')
+					return ;
+				}
+
+				var id = ''
+				for (var i=0; i<cs.data.length; i++) {
+					id += cs.data[i].id
+					id += i == cs.data.length-1 ? '' : ','
+				}
+
+				layer.load(2)
+				$.post('{:url("delete")}', { id: id }, function(res) {
+					layer.closeAll()
+                    if(res.code == 0){
+                        layer.msg("删除成功", {icon: 6, time: 1200}, function() {
+                        	location.reload()
+                        });
+                        
+                    } else{
+                        layer.msg("删除失败", {icon: 5, time: 1200});
+                    }
+				})
+			})
+		})
+
+		// 推荐搜索
+		$('#recommendSelect').click(function() {
+			tableIns.reload({
+				url: '{:url("recommendSearch")}',
+				where: {},
+				page: { curr: 1 },
+				done: function(res) {
+				}
+			})
+		})
+	}); 
+
+	// 上传视频
+	var upload = function(id) {
+		// data is null就是上传否则就是编辑
+		var title = id == null ? '视频上传' : '视频编辑'
+		layer.open({
+			type: 2,
+			content: 'upload?id='+id,
+			area: ['100%', '100%'],
+			offset: 't',
+			title: title,
+			resize: false,
+			move: false,
+		})
+	}
+
+	// 搜索
+	var search = function(tableIns) {
+		tableIns.reload({
+			url: '{:url("search")}',
+			where: {
+				type: $('[name=type]').val(),
+				search: $('[name=search]').val()
+			},
+			page: {
+				curr: 1
+			}
+		})
+	}
+
+	// 删除
+	var deleted = function(data) {
+		layer.confirm('确认删除该数据?', function() {
+			layer.closeAll()
+
+			layer.load(2)
+			$.ajax({
+				url : "{:url('delete')}",
+				type : "POST",
+				data : {
+				    'id' : data.id,
+				},
+				dataType : 'json' ,
+				success : function(res){
+					layer.closeAll()
+                    if(res.code == 0){
+                        layer.msg("删除成功", {icon: 6, time: 1200}, function() {
+                        	location.reload()
+                        });
+                        
+                    } else{
+                        layer.msg("删除失败", {icon: 5, time: 1200});
+                    }
+				}
+			});
+		});
+	}
+</script>
+
+<!-- 是否高清 -->
+<script type="text/html" id="isHd">
+	<input type="checkbox" name="is_hd" id="{{ d.id }}" value="{{ d.is_hd }}" title="高清" lay-filter="isHd" {{ d.is_hd == 1 ? 'checked' : '' }} />
+</script>
+
+<!-- 特别推荐 -->
+<script type="text/html" id="recommend">
+	<input type="checkbox" name="recommend" id="{{ d.id }}" value="{{ d.recommend }}" title="推荐" lay-filter="recommend" {{ d.recommend == 1 ? 'checked' : '' }} />
+</script>
+
+<script type="text/html" id="operation">
+	<a class="layui-btn layui-btn-xs" lay-event="detail">编辑</a>
+	<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="deleted">删除</a>
+</script>

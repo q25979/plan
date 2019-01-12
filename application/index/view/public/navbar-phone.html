@@ -1,0 +1,44 @@
+<!-- 手机端菜单 -->
+<div class="off-canvas position-left light-off-menu" id="offCanvas-responsive" data-off-canvas>
+    <div class="off-menu-close">
+        <h3>导航</h3>
+        <span data-toggle="offCanvas-responsive"><i class="fa fa-times"></i></span>
+    </div>
+    <ul class="vertical menu off-menu" data-responsive-menu="drilldown">
+        <li class="has-submenu" v-for="item in nav">
+            <a v-bind:href="item.url">{{ item.name }}</a>
+        </li>
+    </ul>
+</div>
+
+<script>
+    var phonevm = new Vue({
+        el: "#offCanvas-responsive",
+        data: {
+            // 导航条
+            nav: []
+        },
+        beforeCreate: function() {
+            var u = '{:url("home/classify")}'
+
+            $.get(u, function(res) {
+                var newres = [];
+
+                for (var i in res) {
+                    var temp = {
+                        url: "/index?id="+ res[i].id,
+                        name: res[i].name
+                    };
+
+                    newres.push(temp)
+                }
+
+                // 设置导航
+                Vue.set(phonevm, 'nav', newres)
+            })
+        },
+
+        methods: {
+        }
+    });
+</script>

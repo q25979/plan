@@ -1,0 +1,195 @@
+{include file="public:head" /}
+
+{load href="/public/static/plug-in/easyUpload.js/easy-upload.css" /}
+<style>
+	.layui-layer-dialog { top: 160px !important; }
+</style>
+
+<div class="layui-fluid" id="video-upload">
+	<div class="layui-card">
+		<div class="layui-card-header">
+			{if empty($data['id'])}视频上传
+			{else /}视频编辑
+			{/if}
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form" lay-filter="upload">
+				<div class="layui-form-item">
+				    <label class="layui-form-label">视频标题</label>
+				    <div class="layui-input-block">
+				    	<input type="text" name="title" required lay-verify="required" placeholder="请输入视频标题" class="layui-input" value="{$data['title']}">
+				    </div>
+				</div>
+
+				<div class="layui-form-item">
+				    <label class="layui-form-label">视频时长</label>
+				    <div class="layui-input-block">
+				    	<input type="text" name="time" required  lay-verify="required" placeholder="请输入视频时长,输入示例(51:10)" class="layui-input" value="{$data['time']}">
+				    </div>
+				</div>
+
+				<div class="layui-form-item">
+				    <label class="layui-form-label">视频类型</label>
+				    <div class="layui-input-block">
+				    	<select name="type" lay-verify="required" lay-filter="type">
+							{foreach $typelist as $k => $vo}
+								<option value="{$vo.id}">{$vo.type}</option>
+							{/foreach}
+				    	</select>
+				    </div>
+				</div>
+
+				<div class="layui-form-item">
+				    <label class="layui-form-label">是否高清</label>
+				    <div class="layui-input-block">
+				    	<input type="checkbox" name="is_hd" lay-skin="switch" lay-text="是|否" />
+				    </div>
+				</div>
+
+				<div class="layui-form-item">
+				    <label class="layui-form-label">特别推荐</label>
+				    <div class="layui-input-block">
+				    	<input type="checkbox" name="recommend" lay-skin="switch" lay-text="是|否" />
+				    </div>
+				</div>
+
+				<div class="layui-form-item">
+				    <label class="layui-form-label">视频封面</label>
+				    <div class="layui-input-block">
+				    	<input type="text" name="img" required lay-verify="required" placeholder="请输入封面链接或者上传封面" class="layui-input" value="{$data['img']}">
+				    	<button class="layui-btn" style="margin-top: 5px" id="img-btn">封面上传</button>
+				    </div>
+				</div>
+
+				<div class="layui-form-item">
+				    <label class="layui-form-label">视频地址</label>
+				    <div class="layui-input-block">
+				    	<input type="text" name="url" required lay-verify="required" placeholder="请输入视频地址或者上传视频" class="layui-input" value="{$data['url']}">
+				    	<!-- <button class="layui-btn" style="margin-top: 5px" id="video-btn">视频上传</button> -->
+				    	<div id="easyContainer"></div>
+				    </div>
+				</div>
+
+				<div class="layui-form-item">
+				    <label class="layui-form-label">视频描述</label>
+				    <div class="layui-input-block">
+				    	<textarea name="desc" id="desc" style="display: none">{$data['desc']}</textarea>
+				    </div>
+				</div>
+
+				<div class="layui-form-item">
+    				<div class="layui-input-block">
+      					<button class="layui-btn" lay-submit lay-filter="upload-btn">立即提交</button>
+      					<button type="reset" class="layui-btn layui-btn-primary" onclick="window.location.reload()">重置</button>
+    				</div>
+  				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- js -->
+{load href="/public/static/plug-in/easyUpload.js/vendor/jquery.cookie-1.4.1.min.js" /}
+{load href="/public/static/plug-in/easyUpload.js/easyUpload.js" /}
+<script>
+	// 初始化组件
+	layui.use(['form', 'layedit', 'upload'], function() {
+		var form = layui.form,
+			layedit = layui.layedit,
+			upload = layui.upload
+
+		// 富文本编辑器
+		var edit = layedit.build('desc', {
+			height: 180,
+			tool: ['strong', 'italic', 'underline', 'del', '|', 'left', 'center', 'right', 'link', 'face']
+		})
+
+		// 表单初始化
+		form.val('upload', {
+			'is_hd': parseInt('{$data["is_hd"]}'),
+			'recommend': parseInt('{$data["recommend"]}'),
+			'type': parseInt('{$data["type"]}')
+		})
+
+		// 提交按钮监听
+		form.on('submit(upload-btn)', function(data) {
+			var d = data.field;
+			var u = '{:url("upload")}'
+
+			// 设置数据
+			d.is_hd = d.is_hd == undefined ? 0 : 1
+			d.recommend = d.recommend == undefined ? 0 : 1
+			d.desc = layedit.getContent(edit)
+
+			// 表明是视频上传
+			if ('{$data["id"]}' == '' || '{$data["id"]}' == null || '{$data["id"]}' == undefined) {
+				var title = "视频上传"
+			} else {
+				// 表示视频编辑
+				d.id = '{$data["id"]}'
+				var title = "视频编辑"
+			}
+
+			layer.load(2)
+			$.post(u, d, function(res) {
+				layer.closeAll()
+				if (res.code == 0) {
+					layer.alert(title + '成功', function() {
+						window.location.reload()
+					})
+					return ;
+				}
+				layer.msg(title + '失败', { icon: 5 })
+			})
+		})
+
+		// 上传
+		uploadFile(upload, '#img-btn', 'images')
+		// uploadFile(upload, '#video-btn', 'videos')
+		
+		// 上传文件
+		function uploadFile(upload, elem, type) {
+			upload.render({
+				elem: elem,
+				url: '{:url("upload/index")}',
+				field: 'filename',
+				accept: 'file',
+				data: { type: type },
+				before: function() {
+					layer.load(2)
+				},
+				done: function(res) {
+					layer.closeAll('loading')
+					if (res.code == 0) {
+						type == 'images' ? $('[name=img]').val(res.path) : $('[name=url]').val(res.path)
+						layer.msg('上传成功', { icon: 6, time: 1200 })
+						return false
+					}
+
+					layer.msg('上传失败', { icon: 5, time: 1200 })
+				}
+			})
+		}
+	})
+
+	// 视频上传
+	$('#easyContainer').easyUpload({
+		allowFileTypes: '*.mp4',
+		allowFileSize: 1000000,
+		selectText: '选择文件',
+		multi: false,
+		multiName: 1,
+		showNote: true,
+		note: '提示：大文件视频暂时不能上传，只能先上传到服务器然后填上链接',
+		showPreview: true,
+		url: '{:url("upload/index")}',
+		fileName: 'filename',
+		formParam: { type: 'videos' },
+		timeout: 30000,
+		okCode: 0,
+		successFunc: function(res) {
+			console.log('success', res)
+			$('[name=url]').val(res.path)
+		}
+	})
+</script>

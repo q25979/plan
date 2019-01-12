@@ -1,0 +1,42 @@
+<div class="layui-side layui-side-menu">
+    <div class="layui-side-scroll">
+        <div class="layui-logo" lay-href="{:url('index/home')}">
+            <span>后台管理</span>
+        </div>
+
+        <ul class="layui-nav layui-nav-tree" lay-shrink="all" id="LAY-system-side-menu" lay-filter="layadmin-system-side-menu">
+
+            <li data-name="data" class="layui-nav-item">
+                <a href="javascript:;" lay-tips="主页" lay-direction="2">
+                    <i class="layui-icon layui-icon-read"></i>
+                    <cite>数据信息</cite>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a lay-href="{:url('index/datainfo')}">数据统计</a></dd>
+                </dl>
+            </li>
+
+            <li data-name="template" class="layui-nav-item">
+                <a href="javascript:;" lay-tips="分类管理" lay-direction="2">
+                    <i class="layui-icon layui-icon-template"></i>
+                    <cite>分类管理</cite>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a lay-href="{:url('Assortment/index')}">彩票分类</a></dd>
+                </dl>
+            </li>
+
+            <li data-name="senior" class="layui-nav-item">
+                <a href="javascript:;" lay-tips="视频管理" lay-direction="2">
+                    <i class="layui-icon layui-icon-engine"></i>
+                    <cite>开奖管理</cite>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd>
+                        <a lay-href="{:url('video/index')}">开奖计划</a>
+                    </dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+</div>
