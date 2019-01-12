@@ -12,7 +12,8 @@ class Index extends Controller
     {
         $id = Request::get('id');
         if (empty($id)) {
-            $id = Classify::min('id');
+            $sort = Classify::min('sort');
+            $id = Classify::getFieldBySort($sort, 'id');
         }
 
         return $this->fetch();

@@ -5,19 +5,38 @@
     .column:last-child:not(:first-child), .columns:last-child:not(:first-child) { float: left; }
 
     #premium { max-width: 75rem; margin: 14px auto; }
-    #premium .heading { padding: 14px 0; }
     
     /* 重写布局 */
-    .secBg { border: 0; }
-    .content>.secBg {  margin-top: 20px; }
-    .content .main-heading { border-bottom: 1px solid #ececec; }
-    .content .main-heading .tabs li.tabs-title:last-of-type a { width: 50px; }
+    .content>div { text-align: center; margin: 10px; margin-bottom: 40px; }
+    .content .lottery h3>span { color: red; }
+    .content .lottery>.number>span { background: red; color: white; width: 40px; height: 40px; display: inline-block; border-radius: 50%; line-height: 40px; }
+    .content .plan>h3, .content .day-plan>h3 { color: blue; }
+    .content .plan>.number { color: red; }
 </style>
 
 <!-- 推荐 -->
 <div id="home" v-cloak>
 <section id="premium" class="content">
-    <div>1</div>
+    <div class="lottery">
+        <h3>江苏快3 <span>第001期</span> 开奖号码</h3>
+        <h3 class="number">
+            <span>5</span>
+            <span>4</span>
+            <span>6</span>
+        </h3>
+    </div>
+    <div class="plan">
+        <h3>默默导师开奖计划</h3>
+        <h3 class="number">第021期 开奖 【大】 等开</h3>
+        <p style="margin-bottom: 5px">网页自动更新计划，用户无需手动刷新！</p>
+        <p>提醒：和值10以上为大</p>
+    </div>
+    <div class="day-plan">
+        <h3>当日计划表</h3>
+        <h4>【默默】第003期 计划 【大】 中</h4>
+        <h4>【默默】第002期 计划 【大】 中</h4>
+        <h4>【默默】第001期 计划 【大】 中</h4>
+    </div>
 </section>
 </div>
 <!-- End main content -->
