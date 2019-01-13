@@ -2,6 +2,7 @@
     <style>
         .menu-text>a>div { color: red; }
         .menu-text>a>div:nth-child(1) { font-size: 1rem; }
+        #beNav { height: 80px; }
     </style>
 
     <!--Navber-->
@@ -14,7 +15,6 @@
                             <button class="menu-icon" type="button" data-toggle="offCanvas-responsive"></button>
                             <div class="title-bar-title">
                                 <!-- <img src="/images/logo-small.png" alt="logo"> -->
-
                             </div>
                         </div>
 
@@ -30,9 +30,14 @@
                             </div>
                             <div class="top-bar-right">
                                 <ul class="menu vertical medium-horizontal" data-responsive-menu="drilldown medium-dropdown">
-                                    <li class="has-submenu pc-nav" v-for="item in nav">
-                                        <span style="display:none">{{ item.id }}</span>
-                                        <a v-bind:href="item.url">{{ item.name }}</a>
+                                    <li class="has-submenu pc-nav active">
+                                        <a href="">江苏快3</a>
+                                    </li>
+                                    <li class="has-submenu pc-nav">
+                                        <a href="">北京PK10</a>
+                                    </li>
+                                    <li class="has-submenu pc-nav">
+                                        <a href="">重庆时时彩</a>
                                     </li>
                                 </ul>
                             </div>
@@ -52,24 +57,6 @@
             nav: []
         },
         beforeCreate: function() {
-            var u = '{:url("home/classify")}'
-
-            $.get(u, function(res) {
-                var newres = [];
-
-                for (var i in res) {
-                    var temp = {
-                        url: "/index?id="+ res[i].id,
-                        name: res[i].name,
-                        id: res[i].id
-                    };
-
-                    newres.push(temp)
-                }
-
-                // 设置导航
-                Vue.set(pcvm, 'nav', newres)
-            })
         },
         // 数据更新之后
         updated: function() {
